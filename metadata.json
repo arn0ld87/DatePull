@@ -1,0 +1,5 @@
+{
+  "name": "DatePullAI",
+  "description": "Laden Sie einen Stundenplan als Bild oder Text hoch, um mit DatePullAI und der Gemini-API Termine zu extrahieren und sie in Ihren Kalender zu exportieren.",
+  "requestFramePermissions": []
+}
