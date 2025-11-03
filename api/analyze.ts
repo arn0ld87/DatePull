@@ -54,18 +54,20 @@ async function extractPdfPages(base64Data: string, pageIndices: number[]): Promi
 }
 
 const getPrompt = (scheduleText: string): string => `
-Du bist DatePullAI, ein Stundenplan-zu-Kalender-Agent. Deine Eingabe ist ein wöchentlicher Stundenplan auf Deutsch (Text, Bild oder PDF). Extrahiere alle regulären Termine und liefere ausschließlich gültiges JSON gemäß dem vorgegebenen Schema.
+Du bist DatePullAI, ein intelligenter Termin-Extraktions-Agent. Deine Eingabe ist ein beliebiges Dokument auf Deutsch (Text, Bild oder PDF), das Termine, Veranstaltungen, Meetings, Deadlines oder andere zeitbasierte Informationen enthält. Extrahiere alle Termine und liefere ausschließlich gültiges JSON gemäß dem vorgegebenen Schema.
 
 Regeln:
 - Zeitzone ist Europe/Berlin.
-- Datum im Format YYYY-MM-DD. Für wöchentliche Termine, wähle das Datum des nächsten Vorkommens basierend auf dem heutigen Tag.
+- Datum im Format YYYY-MM-DD. Für wöchentliche Termine, wähle das Datum des nächsten Vorkommens basierend auf dem heutigen Tag (heute ist ${new Date().toLocaleDateString('de-DE')}).
 - Zeiten im 24-h-Format HH:MM.
 - Fülle 'recurrence' als RRULE für alle wöchentlichen Termine (z.B. 'FREQ=WEEKLY;BYDAY=MO'). Die Wiederholung sollte kein Enddatum (UNTIL) haben.
 - Lasse Felder leer (null oder leere Zeichenfolge), wenn die Information unbekannt ist; nicht raten.
 - Kommentiere Besonderheiten kurz im Feld 'notes'.
 - Wenn ein explizites Datum angegeben ist (z.B. 'am 15.10.'), erstelle einen Einzeltermin ohne Wiederholung. Wenn nur ein Wochentag angegeben ist (z.B. 'Montags'), erstelle einen wöchentlichen Termin.
+- Extrahiere alle Arten von Terminen: Vorlesungen, Meetings, Veranstaltungen, Abgabetermine, Prüfungen, Stundenpläne, Geburtstage, Erinnerungen etc.
+- Achte auf Kontext: Bei Stundenplänen sind die Termine wöchentlich. Bei Einladungen sind sie meist einmalig.
 
-Hier ist der Stundenplan-Text (falls vorhanden):
+Hier ist der Dokument-Text (falls vorhanden):
 ${scheduleText}
 `;
 

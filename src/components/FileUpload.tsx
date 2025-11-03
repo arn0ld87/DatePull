@@ -97,7 +97,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ file, setFile, pdfPages, setPdf
         <div className="mt-6">
           <h4 className="font-semibold mb-2 text-brand-text-secondary">Ausgewählte Datei:</h4>
           {preview ? (
-            <img src={preview} alt="Vorschau des Stundenplans" className="max-w-full h-auto rounded-lg shadow-md border border-brand-surface-light" />
+            <img src={preview} alt="Vorschau des Dokuments" className="max-w-full h-auto rounded-lg shadow-md border border-brand-surface-light" />
           ) : (
             <div className="p-3 bg-brand-surface rounded-lg flex items-center space-x-3 shadow-inner border border-brand-surface-light">
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-primary flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">

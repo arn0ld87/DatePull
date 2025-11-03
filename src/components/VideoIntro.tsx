@@ -42,6 +42,10 @@ const VideoIntro: React.FC<VideoIntroProps> = ({ onComplete }) => {
     }
   };
 
+  // Vite provides BASE_URL via import.meta.env.BASE_URL, but TS types may be missing
+  // so we use a safe any-cast and fallback to root.
+  const baseUrl: string = ((import.meta as any).env && (import.meta as any).env.BASE_URL) || '/';
+
   return (
     <div 
       className={`fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-300 ${
@@ -56,7 +60,8 @@ const VideoIntro: React.FC<VideoIntroProps> = ({ onComplete }) => {
         muted
         className="w-full h-full object-contain"
       >
-        <source src="/media/Download.mp4" type="video/mp4" />
+  {/* Use Vite base so the path works when deployed to a subfolder */}
+  <source src={`${baseUrl}media/Download.mp4`} type="video/mp4" />
         Dein Browser unterstützt keine Videos.
       </video>
       

@@ -42,7 +42,7 @@ const AnalyzeView: React.FC = () => {
             return;
         }
         if (mode === 'text' && !scheduleText.trim()) {
-            setError('Bitte geben Sie den Text des Stundenplans ein.');
+            setError('Bitte geben Sie den Text des Dokuments ein.');
             return;
         }
 
@@ -85,7 +85,7 @@ const AnalyzeView: React.FC = () => {
         const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'stundenplan.ics';
+        link.download = 'termine.ics';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -97,7 +97,7 @@ const AnalyzeView: React.FC = () => {
                 <div className="text-center p-8">
                     <Loader />
                     <p className="mt-4 text-lg">
-                        Gemini analysiert deinen Stundenplan...
+                        Gemini analysiert dein Dokument...
                     </p>
                     <p className="text-sm text-brand-text-secondary">Dies kann einen Moment dauern.</p>
                 </div>
@@ -189,7 +189,7 @@ const AnalyzeView: React.FC = () => {
               disabled={isLoading || (!scheduleFile && !scheduleText.trim())}
               className="w-full bg-brand-primary hover:bg-brand-secondary text-white font-semibold py-3 px-4 rounded-xl shadow-lg disabled:bg-brand-surface-light disabled:text-brand-text-secondary disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] flex items-center justify-center"
             >
-              Stundenplan analysieren
+              Dokument analysieren
             </button>
         </div>
     </Card>
