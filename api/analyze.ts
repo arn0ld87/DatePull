@@ -1,10 +1,56 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from "@google/genai";
+import { PDFDocument } from 'pdf-lib';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
 if (!API_KEY) {
   console.error("GEMINI_API_KEY environment variable not set.");
+}
+
+function parsePageNumbers(pagesInput: string): number[] | null {
+  const pages = new Set<number>();
+  
+  if (!pagesInput || !pagesInput.trim()) {
+    return null;
+  }
+  
+  const parts = pagesInput.split(',').map(p => p.trim());
+  
+  for (const part of parts) {
+    if (part.includes('-')) {
+      const [start, end] = part.split('-').map(n => parseInt(n.trim(), 10));
+      if (isNaN(start) || isNaN(end)) continue;
+      for (let i = start; i <= end; i++) {
+        pages.add(i - 1);
+      }
+    } else {
+      const page = parseInt(part, 10);
+      if (!isNaN(page)) {
+        pages.add(page - 1);
+      }
+    }
+  }
+  
+  return Array.from(pages).sort((a, b) => a - b);
+}
+
+async function extractPdfPages(base64Data: string, pageIndices: number[]): Promise<string> {
+  const pdfBytes = Buffer.from(base64Data, 'base64');
+  const srcDoc = await PDFDocument.load(pdfBytes);
+  const newDoc = await PDFDocument.create();
+  
+  const totalPages = srcDoc.getPageCount();
+  
+  for (const index of pageIndices) {
+    if (index >= 0 && index < totalPages) {
+      const [copiedPage] = await newDoc.copyPages(srcDoc, [index]);
+      newDoc.addPage(copiedPage);
+    }
+  }
+  
+  const newPdfBytes = await newDoc.save();
+  return Buffer.from(newPdfBytes).toString('base64');
 }
 
 const getPrompt = (scheduleText: string): string => `
@@ -50,7 +96,7 @@ const schema = {
     required: ["events"]
 };
 
-const parseMultipartFormData = async (req: VercelRequest): Promise<{ file?: { data: string; mimeType: string }, text?: string }> => {
+const parseMultipartFormData = async (req: VercelRequest): Promise<{ file?: { data: string; mimeType: string }, text?: string, pdfPages?: string }> => {
   const contentType = req.headers['content-type'] || '';
   
   if (!contentType.includes('multipart/form-data')) {
@@ -68,6 +114,7 @@ const parseMultipartFormData = async (req: VercelRequest): Promise<{ file?: { da
 
   let fileData: { data: string; mimeType: string } | undefined;
   let textData: string | undefined;
+  let pdfPagesData: string | undefined;
 
   for (const part of parts) {
     if (part.includes('Content-Disposition')) {
@@ -88,11 +135,15 @@ const parseMultipartFormData = async (req: VercelRequest): Promise<{ file?: { da
         const dataStart = part.indexOf('\r\n\r\n') + 4;
         const dataEnd = part.lastIndexOf('\r\n');
         textData = part.substring(dataStart, dataEnd);
+      } else if (name === 'pdfPages') {
+        const dataStart = part.indexOf('\r\n\r\n') + 4;
+        const dataEnd = part.lastIndexOf('\r\n');
+        pdfPagesData = part.substring(dataStart, dataEnd);
       }
     }
   }
 
-  return { file: fileData, text: textData };
+  return { file: fileData, text: textData, pdfPages: pdfPagesData };
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -105,16 +156,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { file, text } = await parseMultipartFormData(req);
+    const { file, text, pdfPages } = await parseMultipartFormData(req);
     const scheduleText = text || '';
+
+    let fileData = file;
+
+    // Wenn es eine PDF-Datei ist und Seiten ausgewählt wurden
+    if (file && file.mimeType === 'application/pdf' && pdfPages && pdfPages.trim()) {
+      const pageIndices = parsePageNumbers(pdfPages);
+      
+      if (pageIndices && pageIndices.length > 0) {
+        const processedPdfBase64 = await extractPdfPages(file.data, pageIndices);
+        fileData = {
+          data: processedPdfBase64,
+          mimeType: file.mimeType
+        };
+      }
+    }
 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const model = 'gemini-2.5-flash';
     const prompt = getPrompt(scheduleText);
     
     const contents = [];
-    if (file) {
-      contents.push({ inlineData: { data: file.data, mimeType: file.mimeType } });
+    if (fileData) {
+      contents.push({ inlineData: { data: fileData.data, mimeType: fileData.mimeType } });
     }
     contents.push({ text: prompt });
 

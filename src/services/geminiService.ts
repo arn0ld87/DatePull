@@ -3,6 +3,7 @@ import type { CalendarEvent } from '../types';
 export const analyzeSchedule = async (
   file: File | null,
   text: string,
+  pdfPages?: string
 ): Promise<CalendarEvent[]> => {
   const formData = new FormData();
   
@@ -12,6 +13,10 @@ export const analyzeSchedule = async (
   
   if (text) {
     formData.append('text', text);
+  }
+
+  if (pdfPages && pdfPages.trim()) {
+    formData.append('pdfPages', pdfPages.trim());
   }
 
   const response = await fetch('/api/analyze', {

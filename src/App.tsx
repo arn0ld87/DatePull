@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import VideoIntro from './components/VideoIntro';
 import AnalyzeView from './views/AnalyzeView';
 import HistoryView from './views/HistoryView';
 import InfoView from './views/InfoView';
@@ -9,6 +10,15 @@ type ViewMode = 'analyze' | 'history' | 'info';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewMode>('analyze');
+  const [showIntro, setShowIntro] = useState(true);
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
+
+  if (showIntro) {
+    return <VideoIntro onComplete={handleIntroComplete} />;
+  }
 
   const renderContent = () => {
     switch (activeView) {

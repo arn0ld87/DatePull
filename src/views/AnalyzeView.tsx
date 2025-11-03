@@ -29,6 +29,7 @@ const AnalyzeView: React.FC = () => {
     const [inputMode, setInputMode] = useState<InputMode>('image');
     const [scheduleFile, setScheduleFile] = useState<File | null>(null);
     const [scheduleText, setScheduleText] = useState<string>('');
+    const [pdfPages, setPdfPages] = useState<string>('');
     const [extractedEvents, setExtractedEvents] = useState<CalendarEvent[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -53,7 +54,8 @@ const AnalyzeView: React.FC = () => {
         try {
             const results = await analyzeSchedule(
                 mode === 'image' ? scheduleFile : null,
-                mode === 'text' ? scheduleText : ''
+                mode === 'text' ? scheduleText : '',
+                pdfPages
             );
             setExtractedEvents(results);
         } catch (err) {
@@ -66,11 +68,12 @@ const AnalyzeView: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [scheduleFile, scheduleText]);
+    }, [scheduleFile, scheduleText, pdfPages]);
 
     const handleReset = () => {
         setScheduleFile(null);
         setScheduleText('');
+        setPdfPages('');
         setExtractedEvents([]);
         setError(null);
         setIsLoading(false);
@@ -175,7 +178,7 @@ const AnalyzeView: React.FC = () => {
         </div>
 
         {inputMode === 'image' ? (
-        <FileUpload file={scheduleFile} setFile={setScheduleFile} />
+        <FileUpload file={scheduleFile} setFile={setScheduleFile} pdfPages={pdfPages} setPdfPages={setPdfPages} />
         ) : (
         <TextInput text={scheduleText} setText={setScheduleText} />
         )}

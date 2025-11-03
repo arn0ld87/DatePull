@@ -3,6 +3,8 @@ import React, { useCallback, useState } from 'react';
 interface FileUploadProps {
   file: File | null;
   setFile: (file: File | null) => void;
+  pdfPages?: string;
+  setPdfPages?: (pages: string) => void;
 }
 // Custom Icon
 const IconUploadCloud: React.FC<{ className?: string }> = ({ className }) => (
@@ -13,20 +15,23 @@ const IconUploadCloud: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 
-const FileUpload: React.FC<FileUploadProps> = ({ file, setFile }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ file, setFile, pdfPages, setPdfPages }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isPdf, setIsPdf] = useState(false);
 
   const handleFileChange = (selectedFile: File | null) => {
     setFile(null);
     setPreview(null);
+    setIsPdf(false);
 
     if (selectedFile) {
       const isImage = selectedFile.type.startsWith('image/');
-      const isPdf = selectedFile.type === 'application/pdf';
+      const isPdfFile = selectedFile.type === 'application/pdf';
 
-      if (isImage || isPdf) {
+      if (isImage || isPdfFile) {
         setFile(selectedFile);
+        setIsPdf(isPdfFile);
         if (isImage) {
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -100,6 +105,25 @@ const FileUpload: React.FC<FileUploadProps> = ({ file, setFile }) => {
                  </svg>
                  <span className="font-mono text-sm text-brand-text-primary truncate">{file.name}</span>
              </div>
+          )}
+          
+          {isPdf && setPdfPages && (
+            <div className="mt-4">
+              <label htmlFor="pdf-pages" className="block text-sm font-medium text-brand-text-secondary mb-2">
+                Seiten auswählen (optional)
+              </label>
+              <input
+                type="text"
+                id="pdf-pages"
+                value={pdfPages || ''}
+                onChange={(e) => setPdfPages(e.target.value)}
+                placeholder="z.B. 8 oder 1,3,8 oder 5-8"
+                className="w-full px-3 py-2 bg-brand-surface border border-brand-surface-light rounded-lg text-brand-text-primary placeholder-brand-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-colors"
+              />
+              <p className="mt-1 text-xs text-brand-text-secondary/70">
+                Einzelne Seiten (8), Bereiche (5-8) oder Kombination (1,3,8). Leer lassen für alle Seiten.
+              </p>
+            </div>
           )}
         </div>
       )}
