@@ -8,44 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              'brand-dark': '#0A0A0A',
-              'brand-surface': '#141414',
-              'brand-surface-light': '#1F1F1F',
-              'brand-primary': '#007BFF',
-              'brand-secondary': '#0056b3',
-              'brand-text-primary': '#EAEAEA',
-              'brand-text-secondary': '#888888',
-            },
-            boxShadow: {
-              'glow': '0 0 15px 0 rgba(0, 123, 255, 0.1)',
-              'glow-lg': '0 0 30px 0 rgba(0, 123, 255, 0.15)',
-            }
-          },
-        },
-      }
-    </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0"
-  }
-}
-</script>
-</head>
+  </head>
   <body class="bg-brand-dark h-screen overflow-hidden">
     <div id="root" class="h-full"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

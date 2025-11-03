@@ -1,0 +1,39 @@
+import React, { useState } from 'react';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import AnalyzeView from './views/AnalyzeView';
+import HistoryView from './views/HistoryView';
+import InfoView from './views/InfoView';
+
+type ViewMode = 'analyze' | 'history' | 'info';
+
+const App: React.FC = () => {
+  const [activeView, setActiveView] = useState<ViewMode>('analyze');
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'analyze':
+        return <AnalyzeView />;
+      case 'history':
+        return <HistoryView />;
+      case 'info':
+        return <InfoView />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="h-screen w-screen bg-brand-dark text-brand-text-primary font-sans flex overflow-hidden">
+      <Sidebar activeView={activeView} setActiveView={setActiveView} />
+      <div className="flex-1 flex flex-col h-full">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-brand-dark">
+            {renderContent()}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default App;

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { CalendarEvent } from '../types';
+import { analyzeSchedule } from '../services/geminiService';
 import { generateIcsContent } from '../utils/calendarUtils';
 import FileUpload from '../components/FileUpload';
 import TextInput from '../components/TextInput';
@@ -7,19 +8,6 @@ import EventList from '../components/EventList';
 import Loader from '../components/Loader';
 import ErrorMessage from '../components/ErrorMessage';
 import Card from '../components/Card';
-
-interface AnalyzeViewProps {
-  scheduleFile: File | null;
-  setScheduleFile: (file: File | null) => void;
-  scheduleText: string;
-  setScheduleText: (text: string) => void;
-  handleAnalysis: () => void;
-  extractedEvents: CalendarEvent[];
-  isLoading: boolean;
-  error: string | null;
-  analysisStarted: boolean;
-  onReset: () => void;
-}
 
 type InputMode = 'image' | 'text';
 
@@ -37,19 +25,57 @@ const IconRestart: React.FC<{className?: string}> = ({className}) => (
 );
 
 
-const AnalyzeView: React.FC<AnalyzeViewProps> = ({
-  scheduleFile,
-  setScheduleFile,
-  scheduleText,
-  setScheduleText,
-  handleAnalysis,
-  extractedEvents,
-  isLoading,
-  error,
-  analysisStarted,
-  onReset,
-}) => {
+const AnalyzeView: React.FC = () => {
     const [inputMode, setInputMode] = useState<InputMode>('image');
+    const [scheduleFile, setScheduleFile] = useState<File | null>(null);
+    const [scheduleText, setScheduleText] = useState<string>('');
+    const [extractedEvents, setExtractedEvents] = useState<CalendarEvent[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [analysisStarted, setAnalysisStarted] = useState<boolean>(false);
+
+    const handleAnalysis = useCallback(async () => {
+        const mode = scheduleFile ? 'image' : 'text';
+        if (mode === 'image' && !scheduleFile) {
+            setError('Bitte wählen Sie eine Bild- oder PDF-Datei aus.');
+            return;
+        }
+        if (mode === 'text' && !scheduleText.trim()) {
+            setError('Bitte geben Sie den Text des Stundenplans ein.');
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        setExtractedEvents([]);
+        setAnalysisStarted(true);
+
+        try {
+            const results = await analyzeSchedule(
+                mode === 'image' ? scheduleFile : null,
+                mode === 'text' ? scheduleText : ''
+            );
+            setExtractedEvents(results);
+        } catch (err) {
+            console.error(err);
+            setError(
+                err instanceof Error
+                    ? `Ein Fehler ist aufgetreten: ${err.message}`
+                    : 'Ein unbekannter Fehler ist aufgetreten.'
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    }, [scheduleFile, scheduleText]);
+
+    const handleReset = () => {
+        setScheduleFile(null);
+        setScheduleText('');
+        setExtractedEvents([]);
+        setError(null);
+        setIsLoading(false);
+        setAnalysisStarted(false);
+    };
 
     const handleExportIcs = () => {
         const icsContent = generateIcsContent(extractedEvents);
@@ -91,7 +117,7 @@ const AnalyzeView: React.FC<AnalyzeViewProps> = ({
                             </div>
                             <div className="flex items-center space-x-2 flex-shrink-0">
                                 <button
-                                    onClick={onReset}
+                                    onClick={handleReset}
                                     className="bg-transparent hover:bg-brand-surface-light border border-brand-surface-light text-brand-text-primary font-semibold py-2 px-4 rounded-xl inline-flex items-center transition-all duration-200"
                                 >
                                     <IconRestart className="h-5 w-5 mr-2" />
@@ -112,11 +138,11 @@ const AnalyzeView: React.FC<AnalyzeViewProps> = ({
                 
                 {extractedEvents.length === 0 && !error && (
                     <Card>
-                         <div className="text-center p-8">
+                        <div className="text-center p-8">
                             <h3 className="text-lg font-semibold">Keine Termine gefunden</h3>
                             <p className="mt-2 text-brand-text-secondary">Das Modell konnte keine Termine aus der Eingabe extrahieren.</p>
                              <button
-                                onClick={onReset}
+                                onClick={handleReset}
                                 className="mt-6 bg-brand-primary hover:bg-brand-secondary text-white font-semibold py-2 px-4 rounded-xl inline-flex items-center transition-all duration-200"
                             >
                                 <span>Nochmal versuchen</span>
