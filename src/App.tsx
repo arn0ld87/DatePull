@@ -5,8 +5,9 @@ import VideoIntro from './components/VideoIntro';
 import AnalyzeView from './views/AnalyzeView';
 import HistoryView from './views/HistoryView';
 import InfoView from './views/InfoView';
+import AzubiHelperView from './views/AzubiHelperView';
 
-type ViewMode = 'analyze' | 'history' | 'info';
+type ViewMode = 'analyze' | 'history' | 'info' | 'azubi-helper';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewMode>('analyze');
@@ -28,6 +29,8 @@ const App: React.FC = () => {
         return <HistoryView />;
       case 'info':
         return <InfoView />;
+      case 'azubi-helper':
+        return <AzubiHelperView />;
       default:
         return null;
     }
