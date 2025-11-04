@@ -3,6 +3,7 @@
 
 import React, { useRef, useState } from 'react';
 import Loader from '../components/Loader';
+import Card from '../components/Card';
 
 const AzubiHelperView: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -61,10 +62,10 @@ const AzubiHelperView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-brand-surface rounded-2xl p-8 shadow-lg mt-8">
-      <h1 className="text-2xl font-bold mb-4 text-brand-primary">Azubi-Helper · Ausbildungsnachweis</h1>
-      <p className="mb-6 text-brand-text-secondary">Stundenplan hochladen, Woche wählen und PDF generieren.</p>
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="max-w-3xl mx-auto mt-8">
+      <Card title="Azubi-Helper · Ausbildungsnachweis">
+        <p className="mb-6 text-brand-text-secondary">Stundenplan hochladen, Woche wählen und PDF generieren.</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">1 · Datei auswählen</label>
@@ -120,6 +121,7 @@ const AzubiHelperView: React.FC = () => {
           </div>
         </div>
       </form>
+      </Card>
     </div>
   );
 };
