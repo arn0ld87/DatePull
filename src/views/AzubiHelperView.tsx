@@ -2,6 +2,7 @@
 
 
 import React, { useRef, useState } from 'react';
+import Loader from '../components/Loader';
 
 const AzubiHelperView: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -107,11 +108,11 @@ const AzubiHelperView: React.FC = () => {
             />
             <button
               type="submit"
-              className="btn-primary w-full mt-2 flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full mt-2 bg-brand-primary hover:bg-brand-secondary text-white font-semibold py-3 px-4 rounded-xl shadow-lg disabled:bg-brand-surface-light disabled:text-brand-text-secondary disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
               disabled={loading}
             >
               {loading ? (
-                <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                <span className="mr-2"><Loader small /></span>
               ) : null}
               Analyse starten
             </button>
